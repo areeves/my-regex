@@ -1,0 +1,25 @@
+{
+  "name": "my-regex",
+  "version": "0.0.0",
+  "description": "An academic JavaScript implmentation of regex.  Not intended for reuse, use built-in RegExp class instead.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/areeves/my-regex.git"
+  },
+  "keywords": [
+    "javascript",
+    "regex",
+    "DFA",
+    "NFA"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/areeves/my-regex/issues"
+  },
+  "homepage": "https://github.com/areeves/my-regex#readme"
+}
