@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha src",
-    "coverage": "istanbul cover node_modules/mocha/bin/_mocha src"
+    "coverage": "istanbul cover node_modules/mocha/bin/_mocha src",
+    "lint": "eslint src/**",
+    "lint-fix": "eslint --fix src/**"
   },
   "repository": {
     "type": "git",
