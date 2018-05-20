@@ -3,8 +3,7 @@
  * This is the storage and manipulation of states and transitions, the actual execution will be handled elsewhere.
  */
 class FSM {
-
-  constructor() {
+  constructor () {
     /**
      * The set of transitions, stored as [qi symbol qj] array triples
      *
@@ -33,7 +32,7 @@ class FSM {
    * @property {Set}
    * @readonly
    */
-  get states() {
+  get states () {
     const s = new Set()
     for (let trans of this.delta) {
       // first and third elements are states
@@ -47,10 +46,10 @@ class FSM {
    * @property {Set}
    * @readonly
    */
-  get symbols() {
+  get symbols () {
     return new Set(
       // second element is our symbol
-      this.delta.map( trans => trans[1] )
+      this.delta.map(trans => trans[1])
     )
   }
 
@@ -65,11 +64,11 @@ class FSM {
    * @property {integer}
    * @readonly
    */
-  get nextState() {
-    let states = Array.from( this.states )
-    states = states.filter( Number.isFinite )
+  get nextState () {
+    let states = Array.from(this.states)
+    states = states.filter(Number.isFinite)
     states.push(0)
-    return Math.max.apply( null, states) + 1
+    return Math.max.apply(null, states) + 1
   }
 
   /**
@@ -78,7 +77,7 @@ class FSM {
    * @param {number|string|symbol} symbol Symbol on which the transition is valid
    * @param {number|string|symbol} to Destination state of the transition
    */
-  add(from, symbol, to) {
+  add (from, symbol, to) {
     this.delta.push([from, symbol, to])
   }
 
@@ -87,11 +86,11 @@ class FSM {
    *  @param {number|string|symbol} from The 'from' state
    *  @return {FSM}
    */
-  from( from ){
+  from (from) {
     let fsm = new FSM()
-    for ( let delta of this.delta ) {
-      if ( delta[0] == from ) {
-        fsm.add( delta[0], delta[1], delta[2])
+    for (let delta of this.delta) {
+      if (delta[0] == from) {
+        fsm.add(delta[0], delta[1], delta[2])
       }
     }
     return fsm
@@ -102,11 +101,11 @@ class FSM {
    *  @param {number|string|symbol} to The 'to' state
    *  @return {FSM}
    */
-  to( to ){
+  to (to) {
     let fsm = new FSM()
-    for ( let delta of this.delta ) {
-      if ( delta[2] == to ) {
-        fsm.add( delta[0], delta[1], delta[2])
+    for (let delta of this.delta) {
+      if (delta[2] == to) {
+        fsm.add(delta[0], delta[1], delta[2])
       }
     }
     return fsm
@@ -117,13 +116,13 @@ class FSM {
    * @param {string} input The input string
    * @return {FSM}
    */
-  static fromString( input ) {
+  static fromString (input) {
     const fsm = new FSM()
     let state = fsm.startState = 1
-    for (let c of input ) {
+    for (let c of input) {
       fsm.add(state, c, ++state)
     }
-    fsm.finalStates.add( state )
+    fsm.finalStates.add(state)
     return fsm
   }
 
@@ -134,7 +133,7 @@ class FSM {
    * @return {FSM}
    * @throws {Error} If either FSM is missing starting or final states
    */
-  static union(fsm1, fsm2) {
+  static union (fsm1, fsm2) {
     if (!(fsm1 instanceof FSM && fsm2 instanceof FSM)) {
       throw new Error('Arguments must be instances of FSM')
     }
@@ -153,7 +152,7 @@ class FSM {
 
     // clone fsm1 into a new FSM
     let result = new FSM()
-    fsm1.delta.forEach( d => result.add( d[0], d[1], d[2] ) )
+    fsm1.delta.forEach(d => result.add(d[0], d[1], d[2]))
     result.startState = fsm1.startState
     result.finalStates = new Set(fsm1.finalStates)
 
@@ -170,12 +169,12 @@ class FSM {
 
     // add the fsm2 deltas, mapping the states
     for (let d of fsm2.delta) {
-      result.add( stateMap.get(d[0]), d[1], stateMap.get(d[2]) )
+      result.add(stateMap.get(d[0]), d[1], stateMap.get(d[2]))
     }
 
     // add mapped final states from fsm2
-    for( let state of fsm2.finalStates) {
-      result.finalStates.add( stateMap.get(state) )
+    for (let state of fsm2.finalStates) {
+      result.finalStates.add(stateMap.get(state))
     }
 
     return result
