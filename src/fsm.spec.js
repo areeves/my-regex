@@ -129,4 +129,50 @@ describe('The FSM class', () => {
       expect(FSM.union(FSM.fromString('foo'), FSM.fromString('bar'))).to.deep.equal(target)
     })
   })
+
+  describe('The concat() static method', () => {
+    it('should concatenate two simple strings', () => {
+      const target = new FSM()
+      target.startState = 1
+      target.add(1, 'f', 2)
+      target.add(2, 'o', 3)
+      target.add(3, 'o', 4)
+      target.add(4, 'b', 5)
+      target.add(5, 'a', 6)
+      target.add(6, 'r', 7)
+      target.finalStates.add(7)
+      expect(
+        FSM.concat(
+          FSM.fromString('foo'),
+          FSM.fromString('bar')
+        )
+      ).to.deep.equal(target)
+    })
+
+    it('should concatenate the union of two simple strings with a third', () => {
+      const target = new FSM()
+      target.startState = 1
+      target.add(1, 'f', 2)
+      target.add(2, 'o', 3)
+      target.add(3, 'o', 4)
+      target.add(1, 'b', 5)
+      target.add(5, 'a', 6)
+      target.add(6, 'r', 7)
+      target.add(4, FSM.EPSILON, 8)
+      target.add(7, FSM.EPSILON, 8)
+      target.add(8, 'b', 9)
+      target.add(9, 'a', 10)
+      target.add(10, 'z', 11)
+      target.finalStates.add(11)
+      expect(
+        FSM.concat(
+          FSM.union(
+            FSM.fromString('foo'),
+            FSM.fromString('bar')
+          ),
+          FSM.fromString('baz')
+        )
+      ).to.deep.equal(target)
+    })
+  })
 })

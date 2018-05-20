@@ -1,8 +1,17 @@
+/*
+ * Class constants
+ */
+const _EPSILON = Symbol('ϵ')
+
 /**
  * Class representing a finite state machine
  * This is the storage and manipulation of states and transitions, the actual execution will be handled elsewhere.
  */
 class FSM {
+  static get EPSILON () {
+    return _EPSILON
+  }
+
   constructor () {
     /**
      * The set of transitions, stored as [qi symbol qj] array triples
@@ -162,6 +171,70 @@ class FSM {
     for (let state of fsm2.states) {
       if (state == fsm2.startState) {
         stateMap.set(state, fsm1.startState)
+      } else {
+        stateMap.set(state, nextState++)
+      }
+    }
+
+    // add the fsm2 deltas, mapping the states
+    for (let d of fsm2.delta) {
+      result.add(stateMap.get(d[0]), d[1], stateMap.get(d[2]))
+    }
+
+    // add mapped final states from fsm2
+    for (let state of fsm2.finalStates) {
+      result.finalStates.add(stateMap.get(state))
+    }
+
+    return result
+  }
+
+  /**
+   * Concatenate two FSMs
+   * @param {FSM} fsm1 First FSM
+   * @param {FSM} fsm2 Second FSM
+   * @returns {FSM}
+   * @throws {Error} If either FSM is missing starting or final states
+   */
+  static concat (fsm1, fsm2) {
+    if (!(fsm1 instanceof FSM && fsm2 instanceof FSM)) {
+      throw new Error('Arguments must be instances of FSM')
+    }
+    if (fsm1.startState == null) {
+      throw new Error('First FSM missing startState')
+    }
+    if (fsm1.finalStates.size == 0) {
+      throw new Error('First FSM must have at least one final state')
+    }
+    if (fsm2.startState == null) {
+      throw new Error('Second FSM missing startState')
+    }
+    if (fsm2.finalStates.size == 0) {
+      throw new Error('Second FSM must have at least one final state')
+    }
+
+    // clone fsm1 into a new FSM
+    let result = new FSM()
+    fsm1.delta.forEach(d => result.add(d[0], d[1], d[2]))
+    result.startState = fsm1.startState
+
+    // if fsm1 has multiple final states, merge with epsilon
+    let fsm1finalState
+    if (fsm1.finalStates.size == 1) {
+      fsm1finalState = fsm1.finalStates.values().next().value
+    } else {
+      fsm1finalState = result.nextState
+      for (let state of fsm1.finalStates) {
+        result.add(state, FSM.EPSILON, fsm1finalState)
+      }
+    }
+
+    // add fsm states, mapping its startState to the final state of fsm1
+    let nextState = result.nextState
+    let stateMap = new Map()
+    for (let state of fsm2.states) {
+      if (state == fsm2.startState) {
+        stateMap.set(state, fsm1finalState)
       } else {
         stateMap.set(state, nextState++)
       }
