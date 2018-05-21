@@ -175,4 +175,53 @@ describe('The FSM class', () => {
       ).to.deep.equal(target)
     })
   })
+
+  describe('The fromOn() method', () => {
+    it('should handle multiple from and to states', () => {
+      let fsm = new FSM()
+      fsm.add(1, 'a', 2)
+      fsm.add(1, 'a', 3)
+      fsm.add(3, 'a', 4)
+      fsm.add(4, 'a', 5)
+      fsm.add(4, 'a', 6)
+      fsm.add(1, 'b', 7)
+      fsm.add(4, 'b', 8)
+      let target = [2, 3, 5, 6]
+      let result = fsm.fromOn([1, 4], 'a')
+      expect(Array.from(result)).to.have.members(target)
+    })
+  })
+
+  describe('The epsilonClosure() method', () => {
+    it('should traverse multiple epsilons', () => {
+      let fsm = new FSM()
+      fsm.add(1, FSM.EPSILON, 2)
+      fsm.add(2, FSM.EPSILON, 3)
+      fsm.add(2, FSM.EPSILON, 4)
+      fsm.add(4, 'x', 5)
+      fsm.add(5, 'x', 6)
+      let result = fsm.epsilonClosure([1, 5])
+      let target = [1, 2, 3, 4, 5]
+      expect(Array.from(result)).to.have.members(target)
+    })
+  })
+
+  describe('The removeEpsilons() method', () => {
+    it('should remove epsilons before and after transition', () => {
+      let fsm = new FSM()
+      fsm.add(1, FSM.EPSILON, 2)
+      fsm.add(2, 'x', 3)
+      fsm.add(3, FSM.EPSILON, 4)
+      fsm.finalStates.add(4)
+      fsm.removeEpsilons()
+      let target = new FSM()
+      target.add(2, 'x', 3)
+      target.add(1, 'x', 3)
+      target.add(1, 'x', 4)
+      target.add(2, 'x', 4)
+      target.finalStates.add(3).add(4)
+      expect(Array.from(fsm.finalStates)).to.have.members(Array.from(target.finalStates))
+      expect(fsm).to.deep.equal(target)
+    })
+  })
 })

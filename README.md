@@ -60,10 +60,11 @@ Implemented so far:
 * the union (pipe) operator
 Can parse and compile `foo(bar|baz)wakka` so far.
 
+Can also convert Epsilon-NFA to NFA.
+
 ## TODO
 
 * Add support for the star operator
-* Write method to remove epsilon transitions from NFA
 * Write the executor to actually run the FSM
 
 Maybe later add `?` and `+`

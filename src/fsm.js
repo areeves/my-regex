@@ -252,6 +252,109 @@ class FSM {
 
     return result
   }
+
+  /**
+   * Retrive a set of states reached from the proveded state(s) on the provided transition symbol
+   * @param {Set|array|number|string|symbol} from Starting state or collection of states
+   *  @param {number|string|symbol} on Transition symbol
+   *  @return {Set}  Set of reached states
+   */
+  fromOn (from, on) {
+    // ensure from is a Set
+    if (Array.isArray(from)) {
+      from = new Set(from)
+    }
+    if (!(from instanceof Set)) {
+      from = new Set([from])
+    }
+
+    // filter transitions to those for the from state and the transition symbol
+    // return only the end states
+    let res = this.delta.filter(d => d[1] == on && from.has(d[0]))
+      .map(d => d[2])
+
+    // return as a set
+    return new Set(res)
+  }
+
+  /**
+   * Return the epsilon closure of a state or set of states
+   * @param {Set|number|string|symbol} state State or set of states
+   * @returns {Set} Set of states in the closure
+   */
+  epsilonClosure (state) {
+    // convert to set
+    if (Array.isArray(state)) {
+      state = new Set(state)
+    }
+    if (!(state instanceof Set)) {
+      state = new Set([state])
+    }
+
+    // the state set is our closure, since every state has an implied epsilon transition to itself
+    // Search for new states while set continues to expand
+    let prevSize = 0 // force at least one iteration
+    while (prevSize != state.size) {
+      prevSize = state.size
+      // find the destination states  on epsilon and add them to the set
+      this.fromOn(state, FSM.EPSILON)
+        .forEach(s => state.add(s))
+    }
+    return state
+  }
+
+  /**
+   * Combine epsilonClosure and fromOn
+   * @param {Set|array|number|string|symbol} from From state
+   * @param {number|string|symbol} on Transition symbol
+   * @returns {Set}
+   */
+  epsilonClosureOn (from, on) {
+    return this.epsilonClosure(
+      this.fromOn(
+        this.epsilonClosure(from),
+        on
+      )
+    )
+  }
+
+  /**
+   * Remove epsilons by adding equivelent transitions
+   */
+  removeEpsilons () {
+    // add missing explicit transitions
+    for (let state of this.states) {
+      for (let sym of this.symbols) {
+        let current = this.fromOn(state, sym)
+        let add = this.epsilonClosureOn(state, sym)
+        // remove existing transitions from the add group
+        for (let s of current) {
+          add.delete(s)
+        }
+        // add the rest as new transitions
+        for (let s of add) {
+          this.add(state, sym, s)
+        }
+      }
+    }
+
+    // add any missing states to the finalState set
+    for (let s of this.states) {
+      if (this.finalStates.has(s)) {
+        continue
+      }
+      // if the epsilon closure contains a final state, then this is a final state
+      let closure = this.epsilonClosure(s)
+      for (let c of closure) {
+        if (this.finalStates.has(c)) {
+          this.finalStates.add(s)
+        }
+      }
+    }
+
+    // remove the epsilon transitions
+    this.delta = this.delta.filter(d => d[1] != FSM.EPSILON)
+  }
 }
 
 module.exports = FSM
