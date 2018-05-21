@@ -52,20 +52,23 @@ large enough to represent more than half a million words.
 
 ## Status
 
-No top-level class yet.  Just a few classes under unit/integration tests for some of the various things needed.
-
 Implemented so far:
 * string tokens
-* `(` and `)` for nested expressions
-* the union (pipe) operator
-Can parse and compile `foo(bar|baz)wakka` so far.
+* `(` and `)` operator for nested expressions
+* `|` union operator
 
-Can also convert Epsilon-NFA to NFA.
+```javascript
+let regex = new MyRegEx('foo(bar|baz)wakka')
+regex.test('foobarwakka') // true
+regex.test('foobazwakka') // true
+regex.test('foowakka') // false
+regex.test('foo') // false
+```
 
 ## TODO
 
-* Add support for the star operator
-* Write the executor to actually run the FSM
-
-Maybe later add `?` and `+`
+* Add '*'operator
+* Add '.' symbol
+* Add '?' operator
+* Add '+' operator
 

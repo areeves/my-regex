@@ -1,3 +1,1 @@
-module.exports = {
-  MultiValueTable: require('./src/multi-value-table')
-}
+module.exports = require('./src/my-reg-ex')
