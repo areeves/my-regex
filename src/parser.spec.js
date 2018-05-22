@@ -72,5 +72,19 @@ describe('The Parser class', () => {
       let result = parser.parse('(foo|bar)baz|wakka')
       expect(result).to.deep.equal(target)
     })
+
+    it('should be able to parse `foo*`', () => {
+      let parser = new Parser()
+      let target = { star: 'foo' }
+      let result = parser.parse('foo*')
+      expect(result).to.deep.equal(target)
+    })
+
+    it('should be able to parse `(foo|bar)*`', () => {
+      let parser = new Parser()
+      let target = { star: { union: ['foo', 'bar'] } }
+      let result = parser.parse('(foo|bar)*')
+      expect(result).to.deep.equal(target)
+    })
   })
 })

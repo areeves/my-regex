@@ -57,6 +57,14 @@ class Parser {
         } else {
           cct = [ {union: [ {concat: cct}, this._parse()]} ]
         }
+      } else if (next == '*') {
+        if (str.length) {
+          cct.push(str)
+          str = ''
+        }
+        let child = cct.pop()
+        child = {star: child}
+        cct.push(child)
       } else {
         str += next
       }
