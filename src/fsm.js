@@ -254,6 +254,53 @@ class FSM {
   }
 
   /**
+   * Create a FSM which applies the star operation to the passed-in FSM
+   * @param {FSM} fsm Input FSM
+   * @returns {FSM}
+   * @throws {Error} If FSM is missing starting or final states
+   */
+  static star (fsm) {
+    if (!(fsm instanceof FSM)) {
+      throw new Error('Input must be an FSM')
+    }
+    if (fsm.startState == null) {
+      throw new Error('FSM missing startState')
+    }
+    if (fsm.finalStates.size == 0) {
+      throw new Error('FSM must have at least one final state')
+    }
+
+    // clone fsm into a new FSM
+    let result = new FSM()
+    fsm.delta.forEach(d => result.add(d[0], d[1], d[2]))
+
+    // if fsm has multiple final states, merge with epsilon
+    let finalState
+    if (fsm.finalStates.size == 1) {
+      finalState = fsm.finalStates.values().next().value
+    } else {
+      finalState = result.nextState
+      for (let state of fsm.finalStates) {
+        result.add(state, FSM.EPSILON, finalState)
+      }
+    }
+
+    // create new start and final states and tie them  to the old
+    let newStartState = result.nextState
+    result.add(newStartState, FSM.EPSILON, fsm.startState)
+    result.startState = newStartState
+    let newFinalState = result.nextState
+    result.add(finalState, FSM.EPSILON, newFinalState)
+    result.finalStates.add(newFinalState)
+
+    // connect up with epsilons
+    result.add(newStartState, FSM.EPSILON, newFinalState)
+    result.add(finalState, FSM.EPSILON, fsm.startState)
+
+    return result
+  }
+
+  /**
    * Retrive a set of states reached from the proveded state(s) on the provided transition symbol
    * @param {Set|array|number|string|symbol} from Starting state or collection of states
    *  @param {number|string|symbol} on Transition symbol

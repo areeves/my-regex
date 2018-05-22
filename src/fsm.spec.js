@@ -130,6 +130,39 @@ describe('The FSM class', () => {
     })
   })
 
+  describe('The star() method', () => {
+    it('should return an FSM which is the star construction of `x`', () => {
+      const target = new FSM()
+      target.startState = 3
+      target.add(1, 'x', 2)
+      target.add(3, FSM.EPSILON, 1)
+      target.add(2, FSM.EPSILON, 4)
+      target.add(3, FSM.EPSILON, 4)
+      target.add(2, FSM.EPSILON, 1)
+      target.finalStates.add(4)
+      const result = FSM.star(FSM.fromString('x'))
+      expect(Array.from(result.finalStates)).to.have.members(Array.from(target.finalStates))
+      expect(result).to.deep.equal(target)
+    })
+
+    it('should return an FSM which is the star construction of `x|y`', () => {
+      const target = new FSM()
+      target.startState = 5
+      target.add(1, 'x', 2)
+      target.add(1, 'y', 3)
+      target.add(2, FSM.EPSILON, 4)
+      target.add(3, FSM.EPSILON, 4)
+      target.add(5, FSM.EPSILON, 1)
+      target.add(4, FSM.EPSILON, 6)
+      target.add(5, FSM.EPSILON, 6)
+      target.add(4, FSM.EPSILON, 1)
+      target.finalStates.add(6)
+      const result = FSM.star(FSM.union(FSM.fromString('x'), FSM.fromString('y')))
+      expect(Array.from(result.finalStates)).to.have.members(Array.from(target.finalStates))
+      expect(result).to.deep.equal(target)
+    })
+  })
+
   describe('The concat() static method', () => {
     it('should concatenate two simple strings', () => {
       const target = new FSM()
