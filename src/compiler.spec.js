@@ -61,5 +61,13 @@ describe('The Compiler class', () => {
       let result = compiler.compile({ union: ['foo', 'bar', 'baz' ] })
       expect(result).to.deep.equal(target)
     })
+
+    it('should be able to compile a star node of a string ', () => {
+      let compiler = new Compiler(FSM)
+      let target = FSM.star(FSM.fromString('x'))
+      let result = compiler.compile({star: 'x'})
+      expect(Array.from(result.finalStates)).to.deep.equal(Array.from(target.finalStates))
+      expect(result).to.deep.equal(target)
+    })
   })
 })

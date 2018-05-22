@@ -47,6 +47,11 @@ class Compiler {
       return res
     }
 
+    // star node
+    if (node.star) {
+      return this.FSM.star(this.compile(node.star))
+    }
+
     // unrecognized node
     throw new Error('Unrecognized node structure' + JSON.stringify(node, null, 2))
   }
