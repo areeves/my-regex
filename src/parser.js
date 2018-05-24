@@ -28,9 +28,10 @@ class Parser {
    * Internal recursive function
    * @private
    */
-  _parse (input) {
+  _parse () {
     let str = ''
-    let cct = []
+    let cct = [] // concatenation
+    let alt = [] // alternation
 
     while (this.rest.length) {
       let next = this.rest.shift()
@@ -42,21 +43,18 @@ class Parser {
           str = ''
         }
         let inner = this._parse()
-        if (Array.isArray(inner.concat)) {
-          cct = cct.concat(inner.concat)
-        } else {
-          cct.push(inner)
-        }
+        cct.push(inner)
       } else if (next == '|') {
         if (str.length) {
           cct.push(str)
           str = ''
         }
         if (cct.length == 1) {
-          cct = [ {union: [cct[0], this._parse()]} ]
+          alt.push(cct[0])
         } else {
-          cct = [ {union: [ {concat: cct}, this._parse()]} ]
+          alt.push( {concat: cct} )
         }
+        cct = []
       } else if (next == '*') {
         if (str.length) {
           cct.push(str)
@@ -74,9 +72,15 @@ class Parser {
       cct.push(str)
     }
     if (cct.length == 1) {
-      return cct[0]
+      alt.push(cct[0])
+    } else {
+      alt.push( { concat: cct } )
     }
-    return {concat: cct}
+    if (alt.length == 1) {
+      return alt[0]
+    } else {
+      return { union: alt } 
+    }
   }
 }
 
